@@ -32,7 +32,7 @@ class LRUCache:
 
     def get(self, key):
         if key not in self.map:
-            return -1
+            return None
         node = self.map[key]
         self._remove(node)
         self._insert_mru(node)
