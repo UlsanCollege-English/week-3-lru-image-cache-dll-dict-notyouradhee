@@ -14,14 +14,41 @@ class LRUCache:
         assert capacity > 0
         self.cap = capacity
         self.map = {}
-        # sentinels
-        self.head = _Node("__H__", None)  # most recent after head
-        self.tail = _Node("__T__", None)  # least recent before tail
+        self.head = _Node("__H__", None)
+        self.tail = _Node("__T__", None)
         self.head.next = self.tail
         self.tail.prev = self.head
 
+    def _remove(self, node):
+        p, n = node.prev, node.next
+        p.next = n
+        n.prev = p
+
+    def _insert_mru(self, node):
+        node.next = self.head.next
+        node.prev = self.head
+        self.head.next.prev = node
+        self.head.next = node
+
     def get(self, key):
-        ...
+        if key not in self.map:
+            return None
+        node = self.map[key]
+        self._remove(node)
+        self._insert_mru(node)
+        return node.val
 
     def put(self, key, val):
-        ...
+        if key in self.map:
+            node = self.map[key]
+            node.val = val
+            self._remove(node)
+            self._insert_mru(node)
+        else:
+            if len(self.map) == self.cap:
+                lru = self.tail.prev
+                self._remove(lru)
+                del self.map[lru.key]
+            node = _Node(key, val)
+            self.map[key] = node
+            self._insert_mru(node)
